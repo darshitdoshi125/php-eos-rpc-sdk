@@ -34,8 +34,8 @@ class EosRpc
     /**
      * EosRpc constructor.
      *
-     * @param ChainController $chain
-     * @param WalletController $wallet
+     * @param  ChainController  $chain
+     * @param  WalletController  $wallet
      */
     public function __construct(ChainController $chain, WalletController $wallet)
     {
@@ -46,8 +46,8 @@ class EosRpc
     /**
      * Sets wallet info
      *
-     * @param string $walletName
-     * @param string $walletPwd
+     * @param  string  $walletName
+     * @param  string  $walletPwd
      */
     public function setWalletInfo(string $walletName, string $walletPwd)
     {
@@ -58,7 +58,7 @@ class EosRpc
     /**
      * Make a transaction with the given actions and return
      *
-     * @param array $actions
+     * @param  array  $actions
      *
      * $actions format:
      * $actions[0] = [
@@ -145,194 +145,197 @@ class EosRpc
 
             return $transaction;
         }
-    }
 
-    /**
-     * Push a transaction with the given actions
-     *
-     * @param array $actions
-     * @param bool $trxIdOnly
-     *
-     * $actions format:
-     * $actions[0] = [
-     *     'account'       => $code,
-     *     'name'          => $action,
-     *     'authorization' => [
-     *         [
-     *             'actor'         => $authority['actor'],
-     *             'permission'    => $authority['permission']
-     *         ]
-     *     ],
-     *     'data' => $args
-     * ];
-     *
-     * @return array|string Transaction Result or ID
-     * @throws EosRpcException
-     */
-    public function pushTransaction(array $actions, bool $trxIdOnly = true)
-    {
-        try {
-            $transaction = $this->makeTransaction($actions);
+        /**
+         * Push a transaction with the given actions
+         *
+         * @param  array  $actions
+         * @param  bool  $trxIdOnly
+         *
+         * $actions format:
+         * $actions[0] = [
+         *     'account'       => $code,
+         *     'name'          => $action,
+         *     'authorization' => [
+         *         [
+         *             'actor'         => $authority['actor'],
+         *             'permission'    => $authority['permission']
+         *         ]
+         *     ],
+         *     'data' => $args
+         * ];
+         *
+         * @return array|string Transaction Result or ID
+         * @throws EosRpcException
+         */
+        public
+        function pushTransaction(array $actions, bool $trxIdOnly = true)
+        {
+            try {
+                $transaction = $this->makeTransaction($actions);
 
-            $expiration = $transaction['transaction']['expiration'];
-            $ref_block_num = $transaction['transaction']['ref_block_num'];
-            $ref_block_prefix = $transaction['transaction']['ref_block_prefix'];
-            $extra = [
-                'actions' => $transaction['transaction']['actions'],
-                'signatures' => $transaction['signatures']
-            ];
+                $expiration = $transaction['transaction']['expiration'];
+                $ref_block_num = $transaction['transaction']['ref_block_num'];
+                $ref_block_prefix = $transaction['transaction']['ref_block_prefix'];
+                $extra = [
+                    'actions' => $transaction['transaction']['actions'],
+                    'signatures' => $transaction['signatures']
+                ];
 
-            $result = json_decode(
-                $this->chain->pushTransaction($expiration, $ref_block_num, $ref_block_prefix, $extra),
+                $result = json_decode(
+                    $this->chain->pushTransaction($expiration, $ref_block_num, $ref_block_prefix, $extra),
+                    true
+                );
+
+                if (array_key_exists('transaction_id', $result) === false) {
+                    throw new EosRpcException(json_encode($result));
+                }
+
+                return $trxIdOnly ? $result['transaction_id'] : $result;
+            } catch (HttpException $e) {
+                echo $e->getMessage();
+            }
+        }
+
+        /**
+         * Push transactions
+         *
+         * @param  array  $transactions
+         *
+         * $transactions format:
+         * $transaction[0] = [
+         *     'compression' => 'none',
+         *     'transaction' => [
+         *         'expiration'             => $expiration,
+         *         'ref_block_num'          => $ref_block_num,
+         *         'ref_block_prefix'       => $ref_block_prefix,
+         *         'context_free_actions'   => [],
+         *         'actions'                => $actions,
+         *         'transaction_extensions' => [],
+         *     ],
+         *     'signatures'  => $signatures
+         * ];
+         *
+         * @return array  Result of transactions
+         */
+        public
+        function pushTransactions(array $transactions): array
+        {
+            return json_decode(
+                $this->chain->pushTransactions($transactions),
                 true
             );
-
-            if (array_key_exists('transaction_id', $result) === false) {
-                throw new EosRpcException(json_encode($result));
-            }
-
-            return $trxIdOnly ? $result['transaction_id'] : $result;
-        } catch (HttpException $e) {
-            echo $e->getMessage();
         }
-    }
 
-    /**
-     * Push transactions
-     *
-     * @param array $transactions
-     *
-     * $transactions format:
-     * $transaction[0] = [
-     *     'compression' => 'none',
-     *     'transaction' => [
-     *         'expiration'             => $expiration,
-     *         'ref_block_num'          => $ref_block_num,
-     *         'ref_block_prefix'       => $ref_block_prefix,
-     *         'context_free_actions'   => [],
-     *         'actions'                => $actions,
-     *         'transaction_extensions' => [],
-     *     ],
-     *     'signatures'  => $signatures
-     * ];
-     *
-     * @return array  Result of transactions
-     */
-    public function pushTransactions(array $transactions): array
-    {
-        return json_decode(
-            $this->chain->pushTransactions($transactions),
-            true
-        );
-    }
+        /**
+         * Push an action
+         *
+         * @param  string  $code
+         * @param  string  $action
+         * @param  array  $args  Json format action arguments
+         * @param  array  $authority  ['actor','permission']
+         * @param  bool  $trxIdOnly
+         *
+         * @return array|string Transaction Result or ID
+         * @throws EosRpcException
+         */
+        public
+        function pushAction(string $code, string $action, array $args, array $authority, bool $trxIdOnly = true)
+        {
+            try {
+                $actions[0] = [
+                    'account' => $code,
+                    'name' => $action,
+                    'authorization' => [
+                        [
+                            'actor' => $authority['actor'],
+                            'permission' => $authority['permission']
+                        ]
+                    ],
+                    'data' => $args
+                ];
 
-    /**
-     * Push an action
-     *
-     * @param string $code
-     * @param string $action
-     * @param array $args Json format action arguments
-     * @param array $authority ['actor','permission']
-     * @param bool $trxIdOnly
-     *
-     * @return array|string Transaction Result or ID
-     * @throws EosRpcException
-     */
-    public function pushAction(string $code, string $action, array $args, array $authority, bool $trxIdOnly = true)
-    {
-        try {
-            $actions[0] = [
-                'account' => $code,
-                'name' => $action,
-                'authorization' => [
-                    [
-                        'actor' => $authority['actor'],
-                        'permission' => $authority['permission']
-                    ]
-                ],
-                'data' => $args
-            ];
-
-            return $this->pushTransaction($actions, $trxIdOnly);
-        } catch (EosRpcException $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * Transfers token
-     *
-     * @param string $from
-     * @param string $to
-     * @param string $quantity
-     * @param string $memo
-     * @param string $contract
-     * @param bool $trxIdOnly
-     *
-     * @return array|string Transaction Result or ID
-     * @throws EosRpcException
-     */
-    public function transfer(
-        string $from,
-        string $to,
-        string $quantity,
-        string $memo,
-        string $contract = 'eosio.token',
-        bool $trxIdOnly = true
-    )
-    {
-        // push action $contract transfer '["$from", "$to", "$quantity", "$memo"]'
-
-        try {
-            $args = [
-                'from' => $from,
-                'to' => $to,
-                'quantity' => $quantity,
-                'memo' => $memo
-            ];
-
-            $authority = [
-                'actor' => $from,
-                'permission' => 'active'
-            ];
-
-            return $this->pushAction($contract, 'transfer', $args, $authority, $trxIdOnly);
-        } catch (EosRpcException $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * Creates a key pair and returns
-     *
-     * @param string $keyType
-     * @param bool $noImport An optional param to import keys or not
-     *
-     * @return array  ['publicKey','privateKey']
-     */
-    public function createKeyPair(string $keyType, bool $noImport = true): array
-    {
-        // unlock wallet
-        $this->wallet->unlock($this->walletInfo);
-
-        // create key
-        $ret[0] = trim($this->wallet->createKey($this->walletInfo[0], $keyType), "\"");
-
-        // list keys
-        $keys = json_decode($this->wallet->listKeys($this->walletInfo), true);
-
-        foreach ($keys as $key => $value) {
-            if ($value[0] == $ret[0]) {
-                $ret[1] = $value[1];
-                break;
+                return $this->pushTransaction($actions, $trxIdOnly);
+            } catch (EosRpcException $e) {
+                throw $e;
             }
         }
 
-        // remove key which is created and imported
-        if ($noImport) {
-            $this->wallet->removeKey(array_merge($this->walletInfo, [$ret[0]])) . PHP_EOL;
+        /**
+         * Transfers token
+         *
+         * @param  string  $from
+         * @param  string  $to
+         * @param  string  $quantity
+         * @param  string  $memo
+         * @param  string  $contract
+         * @param  bool  $trxIdOnly
+         *
+         * @return array|string Transaction Result or ID
+         * @throws EosRpcException
+         */
+        public
+        function transfer(
+            string $from,
+            string $to,
+            string $quantity,
+            string $memo,
+            string $contract = 'eosio.token',
+            bool $trxIdOnly = true
+        ) {
+            // push action $contract transfer '["$from", "$to", "$quantity", "$memo"]'
+
+            try {
+                $args = [
+                    'from' => $from,
+                    'to' => $to,
+                    'quantity' => $quantity,
+                    'memo' => $memo
+                ];
+
+                $authority = [
+                    'actor' => $from,
+                    'permission' => 'active'
+                ];
+
+                return $this->pushAction($contract, 'transfer', $args, $authority, $trxIdOnly);
+            } catch (EosRpcException $e) {
+                throw $e;
+            }
         }
 
-        return $ret;
+        /**
+         * Creates a key pair and returns
+         *
+         * @param  string  $keyType
+         * @param  bool  $noImport  An optional param to import keys or not
+         *
+         * @return array  ['publicKey','privateKey']
+         */
+        public
+        function createKeyPair(string $keyType, bool $noImport = true): array
+        {
+            // unlock wallet
+            $this->wallet->unlock($this->walletInfo);
+
+            // create key
+            $ret[0] = trim($this->wallet->createKey($this->walletInfo[0], $keyType), "\"");
+
+            // list keys
+            $keys = json_decode($this->wallet->listKeys($this->walletInfo), true);
+
+            foreach ($keys as $key => $value) {
+                if ($value[0] == $ret[0]) {
+                    $ret[1] = $value[1];
+                    break;
+                }
+            }
+
+            // remove key which is created and imported
+            if ($noImport) {
+                $this->wallet->removeKey(array_merge($this->walletInfo, [$ret[0]])).PHP_EOL;
+            }
+
+            return $ret;
+        }
     }
-}
