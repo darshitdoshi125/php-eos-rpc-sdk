@@ -1,5 +1,6 @@
 # The PHP SDK for the EOS RPC API
 
+Fork with Laravel compatibility
 A PHP wrapper for the EOS Chain/Wallet RPC API.
 
 ## Background
