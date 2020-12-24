@@ -14,7 +14,7 @@ Also, some of the examples in those docs use outdated syntax.
 ## Installing
 
 ```php
-composer require manamine/php-eos-rpc-sdk
+composer require litecoding/php-eos-rpc-sdk
 ```
 
 ## Configuration
