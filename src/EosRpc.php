@@ -144,7 +144,7 @@ class EosRpc
             ];
 
             return $transaction;
-        }
+        }}
 
         /**
          * Push a transaction with the given actions
