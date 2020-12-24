@@ -168,8 +168,7 @@ class EosRpc
          * @return array|string Transaction Result or ID
          * @throws EosRpcException
          */
-        public
-        function pushTransaction(array $actions, bool $trxIdOnly = true)
+        public function pushTransaction(array $actions, bool $trxIdOnly = true)
         {
             try {
                 $transaction = $this->makeTransaction($actions);
@@ -218,8 +217,7 @@ class EosRpc
          *
          * @return array  Result of transactions
          */
-        public
-        function pushTransactions(array $transactions): array
+        public function pushTransactions(array $transactions): array
         {
             return json_decode(
                 $this->chain->pushTransactions($transactions),
@@ -239,8 +237,7 @@ class EosRpc
          * @return array|string Transaction Result or ID
          * @throws EosRpcException
          */
-        public
-        function pushAction(string $code, string $action, array $args, array $authority, bool $trxIdOnly = true)
+        public function pushAction(string $code, string $action, array $args, array $authority, bool $trxIdOnly = true)
         {
             try {
                 $actions[0] = [
@@ -274,8 +271,7 @@ class EosRpc
          * @return array|string Transaction Result or ID
          * @throws EosRpcException
          */
-        public
-        function transfer(
+        public function transfer(
             string $from,
             string $to,
             string $quantity,
@@ -312,8 +308,7 @@ class EosRpc
          *
          * @return array  ['publicKey','privateKey']
          */
-        public
-        function createKeyPair(string $keyType, bool $noImport = true): array
+        public function createKeyPair(string $keyType, bool $noImport = true): array
         {
             // unlock wallet
             $this->wallet->unlock($this->walletInfo);
