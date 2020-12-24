@@ -1,21 +1,27 @@
 {
-    "name": "manamine/php-eos-rpc-sdk",
-    "description": "PHP SDK for the EOS RPC API",
+    "name": "litecoding/php-eos-rpc-sdk",
+    "description": "Updated PHP SDK for the EOS RPC API",
     "type": "library",
     "keywords": ["php","eos","rpc","sdk","api","crypto","blockchain"],
-    "homepage": "https://github.com/alienzin/php-eos-rpc-sdk",
+    "homepage": "https://github.com/litecoding/php-eos-rpc-sdk",
     "license": "MIT",
     "authors": [
         {
             "name": "DongJin Seo",
             "email": "alienzin@manamine.net",
             "role": "Developer"
-        }
+        },
+        {
+            "name": "Aleksandr Grigorov",
+            "email": "litecoding@gmail.com",
+            "role": "Fork Developer"
+        },
     ],
     "require": {
         "guzzlehttp/guzzle": "~6.0",
-        "vlucas/phpdotenv": "^2.4",
-        "php-curl-class/php-curl-class": "^8.1"
+        "php-curl-class/php-curl-class": "^8.1",
+        "php" : "^7.3",
+        "ext-json": "*"
     },
     "require-dev": {
         "mockery/mockery": "0.9.*",
