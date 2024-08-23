@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "guzzlehttp/guzzle": "~7.2",
+        "guzzlehttp/guzzle": "~7.4",
         "php-curl-class/php-curl-class": "^8.1",
         "php" : "^7.3 || ^8.1",
         "ext-json": "*"
